@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "Obisidian CDTP",
+	"name": "Obisidian CDTP",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "A sample plugin for Obsidian using TailwindCSS.",
+	"author": "Ygria",
+	"authorUrl": "https://github.com/zeroliu/obsidian-tailwindcss",
 	"isDesktopOnly": false
 }
