@@ -141,7 +141,7 @@ export function TaskCreateForm({ onSubmit, onCancel }: TaskCreateFormProps) {
     `bg-input border-border ${errors[fieldName] ? "border-destructive" : ""}`
 
   return (
-    <div className="w-full max-w-md mx-auto bg-card border-border shadow-lg card">
+    <div className="w-full max-w-md mx-auto bg-card border-border shadow-lg card bg-linear-to-r from-cyan-500 to-blue-500">
       <div className="pb-4 card-header p-6">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-card-foreground card-title">创建新任务</h2>

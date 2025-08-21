@@ -6,7 +6,8 @@ import {
 	Setting,
 	WorkspaceLeaf,
 } from "obsidian";
-import "@/index.css";
+import "./index.css";
+
 
 // Remember to rename these classes and interfaces!
 
