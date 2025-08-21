@@ -4,7 +4,7 @@ export function App() {
 	return (
 		<div className="bg-background-primary min-h-screen p-8">
 			<header className="mb-8">
-				<h1>My Application</h1>
+				<h1>CDTP</h1>
 				<p className="text-text-muted text-ui-small">
 					Welcome to your new app
 				</p>
