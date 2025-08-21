@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react"
 import { TaskCreateForm } from "./components/task-create-form"
+import { Trophy} from "lucide-react"
 
 // Helper components (Icons and SVG Progress) are included here for completeness
 // --- SVG Icon Components (Replaces lucide-react) ---
@@ -14,7 +15,6 @@ const ClockIcon = ({ className = "" }) => <svg viewBox="0 0 24 24" fill="none" s
 const ToggleLeftIcon = ({ className = "" }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="1" y="5" width="22" height="14" rx="7" ry="7"></rect><circle cx="8" cy="12" r="3"></circle></svg>
 const ToggleRightIcon = ({ className = "" }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="1" y="5" width="22" height="14" rx="7" ry="7"></rect><circle cx="16" cy="12" r="3"></circle></svg>
 const PlusIcon = ({ className = "" }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14" /><path d="M12 5v14" /></svg>
-const TrophyIcon = ({ className = "" }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 5h1.5a2.5 2.5 0 0 0 0-5H18M9 12v7.5A2.5 2.5 0 0 0 11.5 22h1A2.5 2.5 0 0 0 15 19.5V12M9 12H6v- теоретическийM15 12h3v-3M9 9h6" /></svg>
 
 
 // --- Custom SVG Progress Circle Component ---
@@ -445,7 +445,7 @@ export function App() {
 								/>
 								{formatAchievement(task) && (
 									<div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-										<TrophyIcon className="w-3 h-3" />
+										<Trophy className="w-3 h-3" />
 										{formatAchievement(task)}
 									</div>
 								)}

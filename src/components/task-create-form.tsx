@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
+import { X } from "lucide-react"
 
 // --- Icon Replacements (using inline SVG instead of lucide-react) ---
 const XIcon = ({ className }: { className?: string }) => (
@@ -141,7 +142,7 @@ export function TaskCreateForm({ onSubmit, onCancel }: TaskCreateFormProps) {
     `bg-input border-border ${errors[fieldName] ? "border-destructive" : ""}`
 
   return (
-    <div className="w-full max-w-md mx-auto bg-card border-border shadow-lg card bg-linear-to-r from-cyan-500 to-blue-500">
+    <div className="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
       <div className="pb-4 card-header p-6">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-card-foreground card-title">创建新任务</h2>
@@ -150,7 +151,7 @@ export function TaskCreateForm({ onSubmit, onCancel }: TaskCreateFormProps) {
             onClick={onCancel}
             className="h-8 w-8 p-0 hover:bg-secondary inline-flex items-center justify-center rounded-md text-sm font-medium"
           >
-            <XIcon className="h-4 w-4" />
+            <X className="h-4 w-4" />
           </button>
         </div>
       </div>
