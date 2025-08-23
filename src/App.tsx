@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { TaskCreateForm } from "./components/task-create-form";
-import { Columns2, Columns2Icon, Grid, List, Play, Plus, Timer, Trophy } from "lucide-react";
+
 import Lottie from "lottie-react";
 import workout from "./assets/workout.json";
 import building from "./assets/building.json";
@@ -10,10 +9,6 @@ import MyPlugin from "./main";
 import type { RuleChange, TaskData, TaskGroup } from "./types/task";
 import { PomodoroTask } from "./components/pomodoro-task";
 import { Dashboard } from "./components/dashboard";
-
-// NEW: Define task groups array for easy mapping
-
-const taskGroups: Array<TaskGroup> = ["后勤", "建设", "突击", "基础"];
 
 const animationMap: { [key: string]: React.ReactNode } = {
 	exercise: (
@@ -23,7 +18,6 @@ const animationMap: { [key: string]: React.ReactNode } = {
 			className="w-[100px] h-[100px] mx-auto mb-4 select-none pointer-events-none"
 		/>
 	),
-
 	study: (
 		<Lottie
 			animationData={building}
@@ -134,9 +128,6 @@ export function App({ plugin }: AppProps) {
 			return `已完成 ${task.achievedCount} 次`;
 		}
 	};
-
-
-
 	return (
 		<div className="bg-gray-50 min-h-screen p-4 sm:p-8 bg-linear-to-r from-cyan-50 to-blue-50">
 			{activeTask && activeTaskIndex !== null ? (

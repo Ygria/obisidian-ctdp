@@ -4,7 +4,8 @@ import Lottie from "lottie-react";
 import { useState, useEffect, useRef } from "react";
 import * as Diff from "diff";
 import groovyWalkAnimation from "./workout.json";
-import { BookOpen, CheckCircle, ClockIcon, Play, Timer, XCircle } from "lucide-react";
+import ConfenttiAnimation from "../assets/Confetti.json"
+import { BookOpen, CheckCircle, ClockIcon, Home, Play, Timer, XCircle } from "lucide-react";
 import { RuleChange, TaskStatus } from "../types/task";
 
 // --- Custom SVG Progress Circle Component (Unchanged) ---
@@ -61,6 +62,7 @@ export interface PomodoroTaskProps {
     onEnd?: (completed: boolean, timeSpent: number) => void;
     onFail?: () => void;
     animation: React.ReactNode;
+
 }
 
 
@@ -76,6 +78,7 @@ export function PomodoroTask({
     onRulesUpdate,
     onTaskFail,
     onStart,
+    onEnd = (completed: boolean, timeSpent: number) => undefined
 
 }: PomodoroTaskProps) {
     const [status, setStatus] = useState<TaskStatus>("idle");
@@ -176,6 +179,7 @@ export function PomodoroTask({
     const handleToggleComplete = () => {
         clearTimer();
         setStatus("confirming_completion"); // Go to review screen
+
     };
 
     // --- NEW: Handlers for Failure and Completion Confirmation ---
@@ -197,6 +201,7 @@ export function PomodoroTask({
             onRulesUpdate(editedRules); // Inform parent of the change
         }
         setStatus("completed");
+        onEnd(true, 10)
     };
 
     const resetTaskState = () => {
@@ -243,10 +248,12 @@ export function PomodoroTask({
         return (
             <div className="w-full max-w-md mx-auto shadow-lg border rounded-lg bg-white p-6">
                 <div className="text-center">
-                    <CheckCircle className="w-12 h-12 mx-auto text-green-500" fill = "oklch(62.7% 0.194 149.214)" />
+
+
+                    <Lottie animationData={ConfenttiAnimation} className="w-[200px] h-[200px] mx-auto" />
                     <h2 className="mt-2 text-xl font-semibold">任务完成！</h2>
                     <p className="mt-1 text-sm text-gray-500">
-                        做的不错！根据本次经验，是否需要调整任务规则？
+                        做的很棒！根据本次经验，是否需要调整任务规则？
                     </p>
                 </div>
                 <div className="mt-6 space-y-4">
@@ -343,13 +350,20 @@ export function PomodoroTask({
                             </>
                         )}
                         {status === "scheduled" && (
-                            <button
-                                disabled
-                                className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-400 cursor-not-allowed"
-                            >
-                                <ClockIcon className="w-4 h-4 mr-2 animate-spin" />{" "}
-                                预约中...
-                            </button>
+
+                            <>
+                                <button
+                                    disabled
+                                    className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-400 cursor-not-allowed"
+                                >
+                                    <ClockIcon className="w-4 h-4 mr-2 animate-spin" />{" "}
+                                    预约中...
+                                </button>
+
+                                <button>完成预约</button>
+                                <button>放弃任务</button>
+
+                            </>
                         )}
 
                         {(status === "running" || status === "paused") && (
@@ -374,13 +388,19 @@ export function PomodoroTask({
                         )}
                         {status === "completed" && (
                             <button onClick={resetTaskState} className="flex-1 ...">
-                                <CheckCircle className="w-4 h-4 mr-2 text-green-500" /> 重新开始
+                                <CheckCircle className="w-4 h-4 mr-2 text-green-500" /> 再来一次！
                             </button>
                         )}
                         {status === "failed" && (
-                            <button onClick={resetTaskState} className="flex-1 ...">
-                                <XCircle className="w-4 h-4 mr-2 text-red-500" /> 重新开始
-                            </button>
+                            <>
+                                <button onClick={resetTaskState} className="flex-1 ...">
+                                    <XCircle className="w-4 h-4 mr-2 text-red-500" /> 重新开始
+                                </button>
+                                <button>
+                                    <Home />
+
+                                </button>
+                            </>
                         )}
                     </div>
                 </div>

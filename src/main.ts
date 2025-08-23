@@ -1,5 +1,6 @@
 import { ExampleView, VIEW_TYPE_EXAMPLE } from "@/ExampleView";
 import {
+	addIcon,
 	App,
 	parseYaml,
 	Plugin,
@@ -7,6 +8,7 @@ import {
 	Setting,
 	TFile,
 	TFolder,
+	Vault,
 	WorkspaceLeaf,
 } from "obsidian";
 import "./index.css";
@@ -14,6 +16,22 @@ import { TaskData } from "./types/task";
 import { dump } from "js-yaml";
 
 // Remember to rename these classes and interfaces!
+
+// 自定义SVG (番茄 + 钟表)
+const tomatoClockSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="currentColor">
+  <!-- 番茄主体 -->
+  <circle cx="32" cy="36" r="20" fill="#e74c3c" stroke="#c0392b" stroke-width="2"/>
+  <!-- 番茄叶子 -->
+  <path d="M32 16c-4 0-6-4-6-8 2 2 4 2 6 2s4 0 6-2c0 4-2 8-6 8z" fill="#27ae60" stroke="#1e8449" stroke-width="1.5"/>
+  <!-- 钟表外圈 -->
+  <circle cx="32" cy="36" r="12" fill="white" stroke="black" stroke-width="2"/>
+  <!-- 时针 -->
+  <line x1="32" y1="36" x2="32" y2="28" stroke="black" stroke-width="2" stroke-linecap="round"/>
+  <!-- 分针 -->
+  <line x1="32" y1="36" x2="38" y2="36" stroke="black" stroke-width="2" stroke-linecap="round"/>
+</svg>
+`;
 
 interface MyPluginSettings {
 	mySetting: string;
@@ -35,6 +53,9 @@ export default class MyPlugin extends Plugin {
 		await this.loadSettings();
 		await this.ensureFolder(this.settings.folder);
 		await this.scanFiles();
+		// 注册自定义图标
+		addIcon("tomato-clock", tomatoClockSvg);
+
 
 		this.registerView(
 			VIEW_TYPE_EXAMPLE,
@@ -42,7 +63,7 @@ export default class MyPlugin extends Plugin {
 		);
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon("dice", "Sample Plugin", () => {
+		const ribbonIconEl = this.addRibbonIcon("tomato-clock", "CDTP 番茄钟", () => {
 			this.activateView();
 		});
 		// Perform additional things with the ribbon
@@ -74,7 +95,7 @@ export default class MyPlugin extends Plugin {
 		}
 	}
 
-	onunload() {}
+	onunload() { }
 
 	async loadSettings() {
 		this.settings = Object.assign(
@@ -151,19 +172,30 @@ export default class MyPlugin extends Plugin {
 	 */
 	getTasks(): TaskData[] {
 		const tasks: TaskData[] = [];
-		for (const fileContent of this.cache.values()) {
-			try {
-				// 使用 Obsidian 自带的 parseYaml 方法解析文件内容中的 frontmatter
-				// 它非常智能，会自动提取 ---...--- 之间的内容
-				const frontmatter = parseYaml(fileContent) as TaskData;
-				if (frontmatter && frontmatter.name) {
-					// 简单验证一下是否是合法的任务
-					tasks.push(frontmatter);
+
+		const folder = this.app.vault.getAbstractFileByPath(this.settings.folder);
+
+		// 3. 检查它是否确实是一个文件夹 (TFolder)
+		if (folder instanceof TFolder) {
+			// 4. 使用 Vault.recurseChildren 来递归遍历这个文件夹
+			Vault.recurseChildren(folder, (fileOrFolder) => {
+				// 我们只关心文件 (TFile)，并且是 markdown 文件
+				if (fileOrFolder instanceof TFile && fileOrFolder.extension === 'md') {
+					// 这就是文件夹中的一个 Markdown 文件
+					const file = fileOrFolder;
+
+					// 在这里处理你的 metadataCache 逻辑
+					const fileCache = this.app.metadataCache.getFileCache(file);
+					if (fileCache?.frontmatter?.taskGroup) {
+						tasks.push(fileCache.frontmatter as TaskData);
+					}
 				}
-			} catch (error) {
-				console.warn("解析 frontmatter 失败，跳过文件:", error);
-			}
+			});
+		} else {
+			console.error(`未查询到缓存信息`);
 		}
+
+
 		return tasks;
 	}
 
