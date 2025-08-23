@@ -1,3 +1,15 @@
+export type TaskGroup = "后勤" | "建设" | "突击" | "基础";
+
+export type TaskStatus =
+    | "idle"
+    | "scheduled"
+    | "running"
+    | "paused"
+    | "completed"
+    | "failed"
+    | "confirming_completion"; // New status for post-task review
+
+
 export interface TaskData {
 	name: string;
 	type: "timer" | "toggle";
@@ -10,4 +22,12 @@ export interface TaskData {
 	completionSignal: string;
 	achievedCount: number;
 	totalTimeAchieved: number;
+	rulesHistory: RuleChange[],
+
+}
+
+
+export interface RuleChange {
+	timestamp: string;
+	change: string;
 }

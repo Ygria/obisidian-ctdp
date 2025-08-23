@@ -29,7 +29,9 @@ export class ExampleView extends ItemView {
 		this.root = createRoot(container);
 		this.root.render(
 			<StrictMode>
-				<App plugin={this.plugin} />
+				<div className="my-plugin-react-root" id="my-plugin-react-root">
+					<App plugin={this.plugin} />
+				</div>
 			</StrictMode>
 		);
 	}

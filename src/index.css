@@ -1,1 +1,47 @@
 @import "tailwindcss";
+/* * ===================================================================
+ * Targeted CSS Reset for Obsidian Plugin Environment
+ * ===================================================================
+ * 这个规则块应该放在所有 @tailwind 指令之后。
+ * 它为你的插件根组件创建了一个温和的样式隔离区。
+*/
+
+
+
+@layer base {
+
+    .my-plugin-react-root {
+        /* 允许我们的背景色生效 */
+        background-color: transparent;
+
+        /* 继承 Obsidian 主题的默认文字颜色，这样 text-red-500 等类才能覆盖它 */
+        color: var(--text-normal);
+
+        /* 确保行高和字体大小不会被意外覆盖 */
+        line-height: var(--line-height-normal);
+        font-size: var(--font-size-normal);
+    }
+
+
+    .my-plugin-react-root h1,
+    .my-plugin-react-root h2,
+    .my-plugin-react-root h3,
+    .my-plugin-react-root p,
+    .my-plugin-react-root div,
+    .my-plugin-react-root ul,
+    .my-plugin-react-root li {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        /* 确保内部元素的背景也是透明的，除非你特意指定 */
+        background: transparent;
+    }
+
+
+}
+
+
+@layer components {
+
+
+}
