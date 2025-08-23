@@ -10,23 +10,6 @@ import type { RuleChange, TaskData, TaskGroup } from "./types/task";
 import { PomodoroTask } from "./components/pomodoro-task";
 import { Dashboard } from "./components/dashboard";
 
-const animationMap: { [key: string]: React.ReactNode } = {
-	exercise: (
-		<Lottie
-			animationData={workout}
-			loop={true}
-			className="w-[100px] h-[100px] mx-auto mb-4 select-none pointer-events-none"
-		/>
-	),
-	study: (
-		<Lottie
-			animationData={building}
-			loop={true}
-			className="w-[100px] h-[100px] mx-auto mb-4 select-none pointer-events-none"
-		/>
-	),
-};
-
 // 1. 定义 props 的接口
 interface AppProps {
 	plugin: MyPlugin;
@@ -36,6 +19,8 @@ export function App({ plugin }: AppProps) {
 	const [tasks, setTasks] = React.useState(() => plugin.getTasks());
 	const [showCreateForm, setShowCreateForm] = useState(false);
 	const [activeTaskIndex, setActiveTaskIndex] = useState<number | null>(null);
+	// 预约行为
+	const [startAction, setStartAction] = useState<'immediate' | 'schedule' | null>(null);
 
 	// 从插件的缓存初始化 state
 	const [data, setData] = React.useState(() =>
@@ -60,11 +45,25 @@ export function App({ plugin }: AppProps) {
 		// 因为 deleteEntry 会触发 'delete' 事件，所以视图会自动刷新
 	};
 
-	const handleRulesUpdate = (index: number, newRules: string) => {
+	const handleRulesUpdate = async (index: number, oldRules: string,newRules: string) => {
+
+		debugger
+		
+
 		const newHistoryEntry: RuleChange = {
 			timestamp: new Date().toISOString(),
-			change: `规则更新`, // In a real app, you might generate a diff here too
+			
+			oldRules: oldRules,
+			newRules: newRules
 		};
+
+		const newTasks = [...tasks];
+		const task = newTasks[index];
+		task.rulesHistory = [...(task.rulesHistory ?? []), newHistoryEntry]
+		task.rules = newRules
+
+		setTasks(newTasks);
+		await plugin.updateEntry(task.filePath, task)
 		console.log("规则已在父组件中更新！");
 	};
 
@@ -87,8 +86,9 @@ export function App({ plugin }: AppProps) {
 	};
 
 
-	const handleTaskStart = (index: number) => {
+	const handleTaskStart = (index: number, mode: 'immediate' | 'schedule' | null = null) => {
 		setActiveTaskIndex(index);
+		setStartAction(mode); // 设置收到的指令
 	};
 
 	const handleTaskEnd = (completed: boolean, timeSpent: number) => {
@@ -103,6 +103,7 @@ export function App({ plugin }: AppProps) {
 			setTasks(newTasks);
 		}
 		setActiveTaskIndex(null);
+		setActiveTaskIndex(null);
 	};
 
 	const handleTaskFail = (activeTaskIndex: number, reason: string) => {
@@ -113,6 +114,7 @@ export function App({ plugin }: AppProps) {
 			task.totalTimeAchieved = 0;
 			setTasks(newTasks);
 		}
+		setActiveTaskIndex(null);
 		setActiveTaskIndex(null);
 	};
 
@@ -137,9 +139,10 @@ export function App({ plugin }: AppProps) {
 						key={`${activeTask.name}-${activeTaskIndex}`}
 						{...activeTask}
 						onEnd={handleTaskEnd}
+						initialAction={startAction}
 						onTaskFail={(reason) => handleTaskFail(activeTaskIndex, reason)}
-						onRulesUpdate={(newRules) => handleRulesUpdate(activeTaskIndex, newRules)}
-						animation={animationMap[activeTask.animation] || <></>}
+						onRulesUpdate={(oldRules, newRules) => handleRulesUpdate(activeTaskIndex,oldRules,newRules)}
+						animation={activeTask.animation || 'task-running'}
 					/>
 				</div>
 			) : (

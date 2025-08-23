@@ -8,7 +8,7 @@ import { TaskCreateForm } from './task-create-form';
 
 interface DashboardProps {
     tasks: TaskData[];
-    onTaskStart: (index: number) => void;
+    onTaskStart: (index: number,mode: 'immediate' | 'schedule' ) => void;
     onCreateTask: (newTask: TaskData) => void;
     onTaskFail: (index: number, reason: string) => void;
     onRulesUpdate: (index: number, newRules: string) => void;

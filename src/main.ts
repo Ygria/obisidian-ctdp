@@ -187,7 +187,9 @@ export default class MyPlugin extends Plugin {
 					// 在这里处理你的 metadataCache 逻辑
 					const fileCache = this.app.metadataCache.getFileCache(file);
 					if (fileCache?.frontmatter?.taskGroup) {
-						tasks.push(fileCache.frontmatter as TaskData);
+						tasks.push({ ...fileCache.frontmatter as TaskData,
+							filePath: fileOrFolder.path
+						});
 					}
 				}
 			});

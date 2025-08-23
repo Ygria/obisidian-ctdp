@@ -3,26 +3,10 @@
 import type React from "react"
 import { useState } from "react"
 import { X } from "lucide-react"
-import type { TaskData } from "../App"
+import type { TaskData } from "../types/task"
+import { Animation } from "./animation"
+import { ANIMATION_DATA } from "./animation"
 
-// --- Icon Replacements (using inline SVG instead of lucide-react) ---
-const XIcon = ({ className }: { className?: string }) => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={className}
-    >
-        <path d="M18 6 6 18" />
-        <path d="m6 6 12 12" />
-    </svg>
-)
 
 const PlusIcon = ({ className }: { className?: string }) => (
     <svg
@@ -72,14 +56,15 @@ export function TaskCreateForm({ onSubmit, onCancel }: TaskCreateFormProps) {
         rules: "",
         duration: 25 * 60, // 默认25分钟
         allowPause: true,
-        animation: "study",
+        animation: "building",
         // 新字段的默认值
         appointmentDuration: 15 * 60, // 默认15分钟
         taskGroup: "基础",
         completionSignal: "任务完成！",
         startSignal: "打一个响指",
         achievedCount: 0,
-        totalTimeAchieved: 0
+        totalTimeAchieved: 0,
+        rulesHistory: []
     })
 
     const [errors, setErrors] = useState<Record<string, string>>({})
@@ -267,7 +252,7 @@ export function TaskCreateForm({ onSubmit, onCancel }: TaskCreateFormProps) {
                         {errors.rules && <p className="text-sm text-destructive">{errors.rules}</p>}
                     </div>
 
-                    
+
                     <div className="space-y-2">
                         <label htmlFor="startSignal" className="text-sm font-medium text-foreground">
                             行动开始信号
@@ -293,12 +278,19 @@ export function TaskCreateForm({ onSubmit, onCancel }: TaskCreateFormProps) {
                             onChange={(e) => setFormData({ ...formData, animation: e.target.value })}
                             className="w-full rounded-md border p-2 bg-input border-border"
                         >
-                            {animationOptions.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
+                            {Object.values(ANIMATION_DATA).filter(item => item.name).map((option) => (
+                                <option key={option.code} value={option.code}>
+                                    {option.name}
+
                                 </option>
                             ))}
+
+
                         </select>
+                        <span className="text-sm font-medium text-foreground mt-2">动画预览</span>
+                        <div className="w-[100px] h-[100px] mb-12">
+                            <Animation name={formData.animation} />
+                        </div>
                     </div>
 
                     {/* 是否允许暂停 */}

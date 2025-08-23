@@ -1,15 +1,16 @@
 import React from 'react';
-import { Play, Trophy } from 'lucide-react';
+import { Timer, Play, Trophy } from 'lucide-react';
 import type { DisplayTask } from '../hooks/useFilteredTasks';
-import { PomodoroTask } from './pomodoro-task'; // Assuming PomodoroTask is now a summary card in dashboard
+
+
 
 interface TaskListProps {
     tasks: DisplayTask[];
     view: "card" | "table" | "compact";
-    onTaskStart: (index: number) => void;
+    onTaskStart: (index: number, mode: 'immediate' | 'schedule') => void;
     formatAchievement: (task: DisplayTask) => string | null;
     // You need to pass these down if you want to update from the card view
-    onTaskFail: (index: number, reason: string) => void; 
+    onTaskFail: (index: number, reason: string) => void;
     onRulesUpdate: (index: number, newRules: string) => void;
 }
 
@@ -30,7 +31,10 @@ export function TaskList({ tasks, view, onTaskStart, formatAchievement, onTaskFa
                     <div key={task.originalIndex} className="relative p-4 bg-white rounded-lg shadow-sm border">
                         <h3 className="font-bold">{task.name}</h3>
                         <p className="text-sm text-gray-500">{task.rules}</p>
-                        <button onClick={() => onTaskStart(task.originalIndex)} className="mt-4 text-blue-600 font-semibold">开始</button>
+                        <div className="flex items-center mr-2" onClick={() => onTaskStart(task.originalIndex, 'schedule')}><Timer
+                            className="w-4 h-4 mr-2 text-slate-400" />预约</div>
+                        <button onClick={() => onTaskStart(task.originalIndex, 'immediate')} className="mt-4 text-blue-600 font-semibold"><Play className="w-4 h-4 mr-2 text-emerald-600" />
+                            立刻开始</button>
                         {formatAchievement(task) && (
                             <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
                                 <Trophy className="w-3 h-3" />
@@ -72,10 +76,13 @@ export function TaskList({ tasks, view, onTaskStart, formatAchievement, onTaskFa
                 {tasks.map((task) => (
                     <div key={task.originalIndex} className="p-4 bg-white rounded-lg shadow-sm border flex flex-col justify-between">
                         <div>
-                           <h3 className="font-semibold truncate">{task.name}</h3>
-                           {/* ... other details ... */}
+                            <h3 className="font-semibold truncate">{task.name}</h3>
+                            {/* ... other details ... */}
                         </div>
-                        <button onClick={() => onTaskStart(task.originalIndex)} className="mt-4 w-full ..."><Play className="w-4 h-4 mr-2" />开始</button>
+                        <button onClick={() => onTaskStart(task.originalIndex)} className="mt-4 w-full ..."><Play className="w-4 h-4 mr-2" />
+
+
+                            立刻开始</button>
                     </div>
                 ))}
             </div>

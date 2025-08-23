@@ -3,10 +3,19 @@
 import Lottie from "lottie-react";
 import { useState, useEffect, useRef } from "react";
 import * as Diff from "diff";
-import groovyWalkAnimation from "./workout.json";
+
 import ConfenttiAnimation from "../assets/Confetti.json"
-import { BookOpen, CheckCircle, ClockIcon, Home, Play, Timer, XCircle } from "lucide-react";
+
+import {
+    BookOpen, CheckCircle, ClockIcon, Home, Play, Timer, XCircle, Triangle, TriangleAlert,
+
+    Crown,
+    Split
+
+
+} from "lucide-react";
 import { RuleChange, TaskStatus } from "../types/task";
+import { Animation } from "./animation";
 
 // --- Custom SVG Progress Circle Component (Unchanged) ---
 const SvgCircularProgress = ({ progress, isIndeterminate = false }: { progress: number; isIndeterminate?: boolean; }) => {
@@ -15,17 +24,27 @@ const SvgCircularProgress = ({ progress, isIndeterminate = false }: { progress: 
     const offset = circumference - (progress / 100) * circumference;
     return (
         <svg className="w-32 h-32" viewBox="0 0 120 120">
-            <circle className="text-gray-200" strokeWidth="10" stroke="currentColor" fill="transparent" r={radius} cx="60" cy="60" />
-            <circle className={`transition-all duration-500 ${isIndeterminate ? "animate-spin origin-center" : ""}`} strokeWidth="10" strokeDasharray={circumference} strokeDashoffset={isIndeterminate ? circumference * 0.75 : offset} strokeLinecap="round" stroke="currentColor" fill="transparent" r={radius} cx="60" cy="60" transform="rotate(-90 60 60)" />
+            {!isIndeterminate && <><circle className="text-gray-200" strokeWidth="10" stroke="currentColor" fill="transparent" r={radius} cx="60" cy="60"
+
+            />
+                <circle className={`transition-all duration-500 ${isIndeterminate ? "" : ""}`} strokeWidth="10" strokeDasharray={circumference} strokeDashoffset={isIndeterminate ? 0 : offset} strokeLinecap="round" stroke="currentColor" fill="transparent" r={radius} cx="60" cy="60" transform="rotate(-90 60 60)" />
+            </>
+            }
         </svg>
     );
 };
 
 // --- NEW: Component to render the text diff ---
 const RuleDiffViewer = ({ oldRules, newRules }: { oldRules: string; newRules: string }) => {
+    if (!oldRules || !newRules) {
+        return <></>
+    }
     const changes = Diff.diffChars(oldRules, newRules);
     if (changes.length === 1 && !changes[0].added && !changes[0].removed) {
-        return <p className="text-sm text-gray-400 italic">No changes to the rules.</p>;
+        return <p className="text-sm text-gray-400 italic">
+            为了维护规则神圣，请您确认本次行为符合当前规则。
+
+        </p>;
     }
 
     return (
@@ -56,12 +75,14 @@ export interface PomodoroTaskProps {
     appointmentDuration: number;
     allowPause: boolean;
     rulesHistory: RuleChange[],
-    onRulesUpdate: (newRules: string) => void;
+    onRulesUpdate: (oldRules: string, newRules: string) => void;
     onTaskFail: (reason: string) => void;
     onStart?: () => void;
     onEnd?: (completed: boolean, timeSpent: number) => void;
     onFail?: () => void;
-    animation: React.ReactNode;
+    animation: string
+
+    initialAction?: 'immediate' | 'schedule' | null;
 
 }
 
@@ -78,7 +99,8 @@ export function PomodoroTask({
     onRulesUpdate,
     onTaskFail,
     onStart,
-    onEnd = (completed: boolean, timeSpent: number) => undefined
+    onEnd = (completed: boolean, timeSpent: number) => undefined,
+    initialAction = null, // <-- 在解构时获取新 prop
 
 }: PomodoroTaskProps) {
     const [status, setStatus] = useState<TaskStatus>("idle");
@@ -93,6 +115,16 @@ export function PomodoroTask({
     const [editedRules, setEditedRules] = useState(rules);
 
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        if (initialAction === 'immediate') {
+            console.log("initial action", initialAction)
+            handleStartImmediately(); // 直接开始
+        } else if (initialAction === 'schedule') {
+            console.log("initial action", initialAction)
+            handleSchedule(); // 开始预约
+        }
+    }, []); // 仍然只运行一次
 
     const handleStartImmediately = () => {
         onStart?.();
@@ -198,7 +230,7 @@ export function PomodoroTask({
 
     const handleConfirmCompletion = () => {
         if (editedRules !== rules) {
-            onRulesUpdate(editedRules); // Inform parent of the change
+            onRulesUpdate(rules, editedRules); // Inform parent of the change
         }
         setStatus("completed");
         onEnd(true, 10)
@@ -255,6 +287,10 @@ export function PomodoroTask({
                     <p className="mt-1 text-sm text-gray-500">
                         做的很棒！根据本次经验，是否需要调整任务规则？
                     </p>
+                    <div className="p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-gray-800 dark:text-yellow-300" role="alert">
+                        <span className="font-medium">下必为例。</span>
+                        您的选择将影响接下来所有的任务，为了保证规则的神圣，请您谨慎选择。
+                    </div>
                 </div>
                 <div className="mt-6 space-y-4">
                     <div>
@@ -290,11 +326,12 @@ export function PomodoroTask({
         <>
             <div className="w-full max-w-md mx-auto shadow-lg hover:shadow-xl transition-shadow duration-300 border rounded-lg bg-white">
                 <div className="p-6 pb-4">
-                    <Lottie animationData={groovyWalkAnimation} loop={status === 'running'} />
+
                     <div className="flex items-center justify-between mt-4">
                         <h2 className="text-lg font-semibold">{name}</h2>
                         {/* Status Tags ... */}
                     </div>
+
                     <p className="text-sm text-gray-500 mt-2">{rules}</p>
                     {rulesHistory.length > 0 && (
                         <details className="mt-3">
@@ -306,7 +343,8 @@ export function PomodoroTask({
                                 {rulesHistory.map((entry, i) => (
                                     <div key={i} className="text-xs text-gray-600">
                                         <p className="font-semibold">{new Date(entry.timestamp).toLocaleString()}</p>
-                                        <p className="whitespace-pre-wrap">{entry.change}</p>
+
+                                        <RuleDiffViewer oldRules={entry.oldRules} newRules={entry.newRules} />
                                     </div>
                                 ))}
                             </div>
@@ -319,7 +357,11 @@ export function PomodoroTask({
                         <SvgCircularProgress progress={getProgress()} isIndeterminate={type === "toggle" && status === "running"} />
                         <div className="absolute flex flex-col items-center">
                             <div className={`w-32 h-32 flex items-center justify-center text-xs text-gray-500`}>
-                                {animation}
+                                {/* {animation} */}
+
+                                {status === 'scheduled' && (<Animation name='timer' />)}
+
+                                {status === 'running' && (<Animation name={animation} />)}
                             </div>
                         </div>
                     </div>
@@ -360,8 +402,8 @@ export function PomodoroTask({
                                     预约中...
                                 </button>
 
-                                <button>完成预约</button>
-                                <button>放弃任务</button>
+                                <button onClick={handleStartImmediately}>完成预约</button>
+                                <button onClick={handleInitiateGiveUp}>放弃任务</button>
 
                             </>
                         )}
@@ -415,13 +457,21 @@ export function PomodoroTask({
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="w-96 mx-4 bg-white rounded-lg shadow-xl border">
                         <div className="p-6">
-                            <h2 className="flex items-center gap-2 text-red-600 font-semibold">
-                                <XCircle className="w-5 h-5" /> 确认放弃任务？
-                            </h2>
+                            <span className="flex items-center gap-2 text-red-600 font-semibold">
+                                <TriangleAlert className="w-5 h-5 text-red-600" /> 确认放弃任务？
+
+                            </span>
+                            <Animation name={"broken-chain"} />
                         </div>
                         <div className="p-6 pt-0 space-y-4">
                             <p className="text-sm text-gray-500">
-                                确定要将任务 "{name}" 标记为失败吗？这个操作无法撤销。
+                                确定要将任务 "{name}" 标记为失败吗？
+
+
+                            </p>
+                            <p className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400">
+                                太可惜了！这个操作<span className="font-medium">无法撤销</span>，且将会将此前积累的成就
+                                <span className="font-medium">全部清空</span>。
                             </p>
                             <div>
                                 <label htmlFor="failure-reason" className="block text-sm font-medium text-gray-700">
