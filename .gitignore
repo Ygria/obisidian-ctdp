@@ -24,3 +24,4 @@ data.json
 # Exclude styles.css
 styles.css
 
+.env.local

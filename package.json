@@ -4,7 +4,9 @@
 	"description": "A sample plugin for Obsidian using TailwindCSS.",
 	"main": "main.js",
 	"scripts": {
-		"dev": "vite build --mode development --watch",
+		"dev": "npm-run-all --parallel dev:browser dev:obsidian",
+		"dev:browser": "vite",
+		"dev:obsidian": "cross-env VITE_TARGET_ENV=obsidian vite build --mode development",
 		"build": "tsc -noEmit -skipLibCheck && vite build --mode production",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
@@ -22,6 +24,8 @@
 		"@vitejs/plugin-react": "^4.3.4",
 		"autoprefixer": "^10.4.21",
 		"builtin-modules": "3.3.0",
+		"cross-env": "^7.0.3",
+		"npm-run-all": "^4.1.5",
 		"obsidian": "latest",
 		"postcss": "^8.5.6",
 		"tailwindcss": "^4.1.12",

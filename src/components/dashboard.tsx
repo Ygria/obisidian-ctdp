@@ -17,7 +17,7 @@ interface DashboardProps {
 
 export function Dashboard({ tasks, onTaskStart, onCreateTask, onTaskFail, onRulesUpdate, formatAchievement }: DashboardProps) {
     const [showCreateForm, setShowCreateForm] = useState(false);
-    
+
     // State for controls now lives here
     const [view, setView] = useState<"card" | "table" | "compact">("card");
     const [searchTerm, setSearchTerm] = useState("");
@@ -35,7 +35,7 @@ export function Dashboard({ tasks, onTaskStart, onCreateTask, onTaskFail, onRule
     return (
         <div className="max-w-6xl mx-auto">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-gray-800">任务中心</h1>
+                <h1 className="text-3xl font-bold text-gray-800">CDTP任务中心</h1>
                 <button onClick={() => setShowCreateForm(true)} className="inline-flex ..."><Plus className="h-4 w-4 mr-2" />添加任务</button>
             </div>
 
