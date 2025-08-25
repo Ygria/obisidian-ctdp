@@ -1,12 +1,13 @@
-export type TaskGroup ="基础" | "后勤"
-		| "建设"
-		| "突击"
-	
-		| "健康"
-		| "科技"
-		| "探索"
-		| "采集"
-		| "生产";
+export type TaskGroup =
+	| "基础"
+	| "生产"
+	| "建设"
+	| "突击"
+	| "健康"
+	| "科技"
+	| "探索"
+	| "采集"
+	| "后勤";
 
 export type TaskStatus =
 	| "idle"
@@ -32,8 +33,8 @@ export interface TaskData {
 	allowPause: boolean;
 	animation: string;
 	appointmentDuration: number;
-	taskGroup:TaskGroup
-		
+	taskGroup: TaskGroup;
+
 	completionSignal: string;
 	achievedCount: number;
 	totalTimeAchieved: number;
