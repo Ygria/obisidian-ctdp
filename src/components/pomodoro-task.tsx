@@ -10,12 +10,12 @@ import {
     BookOpen, CheckCircle, ClockIcon, Home, Play, Timer, XCircle, Triangle, TriangleAlert,
 
     Crown,
-    Split, 
+    Split,
     Pause
 
 
 } from "lucide-react";
-import { RuleChange, TaskStatus } from "../types/task";
+import { RuleChange, TaskRecord, TaskStatus } from "../types/task";
 import { Animation } from "./animation";
 
 // --- Custom SVG Progress Circle Component (Unchanged) ---
@@ -69,12 +69,17 @@ const RuleDiffViewer = ({ oldRules, newRules }: { oldRules: string; newRules: st
 
 // --- PomodoroTask Component (Modified with onStart/onEnd/onFail) ---
 export interface PomodoroTaskProps {
+
+    id: string;
+    recordId: string;
+
     name: string;
     type: "timer" | "toggle";
     rules: string;
     duration?: number;
     appointmentDuration: number;
     allowPause: boolean;
+    taskGroup: string;
     rulesHistory: RuleChange[],
     startSignal: string,
     completionSignal: string;
@@ -87,12 +92,23 @@ export interface PomodoroTaskProps {
 
     initialAction?: 'immediate' | 'schedule' | null;
 
+    // 任务结束时，创建一条任务记录
+    onRecordCreate: (record: TaskRecord) => void;
 }
 
 
+// A temporary internal state to hold record data as it's being built
+type InProgressRecord = Partial<Omit<TaskRecord, 'id' | 'createdAt' | 'updatedAt'>> & {
+    pauseStartTime?: Date; // Temporarily store when a pause begins
+};
+
+
 export function PomodoroTask({
+    id: taskId,
+    recordId,
     name,
     type,
+    taskGroup,
     startSignal,
     completionSignal,
     rules,
@@ -106,6 +122,7 @@ export function PomodoroTask({
     onStart,
     onEnd = (completed: boolean, timeSpent: number) => undefined,
     initialAction = null, // <-- 在解构时获取新 prop
+    onRecordCreate
 
 }: PomodoroTaskProps) {
     const [status, setStatus] = useState<TaskStatus>("idle");
@@ -118,8 +135,15 @@ export function PomodoroTask({
     const [showGiveUpConfirm, setShowGiveUpConfirm] = useState(false);
     const [failureReason, setFailureReason] = useState("");
     const [editedRules, setEditedRules] = useState(rules);
+    // +++ State for completion feedback
+    const [completionThoughts, setCompletionThoughts] = useState("");
+    const [completionRating, setCompletionRating] = useState<number | undefined>();
+
+    // +++ State to build the TaskRecord during the task lifecycle
+    const [recordInProgress, setRecordInProgress] = useState<InProgressRecord>({});
 
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
 
     useEffect(() => {
         if (initialAction === 'immediate') {
@@ -133,6 +157,15 @@ export function PomodoroTask({
 
     const handleStartImmediately = () => {
         onStart?.();
+        // 为现在开始的任务创建一条记录
+        const now = new Date();
+        setRecordInProgress({
+            appointmentStart: now,
+            appointmentEnd: now,
+            actualStart: now,
+            pausedCount: 0,
+            pauseDurations: [],
+        });
         handleScheduleSuccess();
     };
 
@@ -141,8 +174,16 @@ export function PomodoroTask({
     };
 
     // --- Task Lifecycle Handlers ---
+    // This is now only called by the automatic scheduler
     const handleStartTask = () => {
         setStatus("running");
+
+        //  Record actual start time 记录真实开始时间
+        setRecordInProgress(prev => ({ // +++ Record appointment end and actual start
+            ...prev,
+            appointmentEnd: new Date(),
+            actualStart: new Date(),
+        }));
         if (type === "timer") {
             setTimeLeft(duration);
             startTimer();
@@ -155,6 +196,12 @@ export function PomodoroTask({
     const handleSchedule = () => {
         setStatus("scheduled");
         setAppointmentTimeLeft(appointmentDuration);
+        //  Record appointment start 记录预约时间
+        setRecordInProgress({
+            appointmentStart: new Date(),
+            pausedCount: 0,
+            pauseDurations: [],
+        });
         clearTimer();
         intervalRef.current = setInterval(() => {
             setAppointmentTimeLeft((prev) => {
@@ -189,6 +236,15 @@ export function PomodoroTask({
 
     const handleScheduleSuccess = () => {
         setStatus("running");
+
+        // +++ Record actual start time
+        if (!recordInProgress.actualStart) {
+            setRecordInProgress(prev => ({
+                ...prev,
+                appointmentEnd: new Date(),
+                actualStart: new Date()
+            }));
+        }
         if (type === "timer") {
             setTimeLeft(duration);
             startTimer();
@@ -207,10 +263,55 @@ export function PomodoroTask({
         if (status === "running") {
             setStatus("paused");
             clearTimer();
+            //  Record pause start time and increment count 记录暂停使用了多久
+            setRecordInProgress(prev => ({
+                ...prev,
+                pausedCount: (prev.pausedCount || 0) + 1,
+                pauseStartTime: new Date(),
+            }));
         } else if (status === "paused") {
             setStatus("running");
             type === "timer" ? startTimer() : startStopwatch();
+
+            if (recordInProgress.pauseStartTime) {
+                const pauseEnd = new Date();
+                const durationMs = pauseEnd.getTime() - recordInProgress.pauseStartTime.getTime();
+                setRecordInProgress(prev => ({
+                    ...prev,
+                    pauseDurations: [...(prev.pauseDurations || []), durationMs],
+                    pauseStartTime: undefined, // Clear the temp start time
+                }));
+            }
         }
+    };
+
+    const finalizeAndCreateRecord = (completed: boolean, feedback: { thoughts?: string; rating?: number; }) => {
+        const now = new Date();
+        const totalPausedDuration = recordInProgress.pauseDurations?.reduce((a, b) => a + b, 0) || 0;
+        const totalActiveDuration = recordInProgress.actualStart
+            ? now.getTime() - recordInProgress.actualStart.getTime() - totalPausedDuration
+            : 0;
+
+        const finalRecord: TaskRecord = {
+            id: recordId,
+            taskId,
+            taskGroup,
+            appointmentStart: recordInProgress.appointmentStart,
+            appointmentEnd: recordInProgress.appointmentEnd,
+            actualStart: recordInProgress.actualStart,
+            actualEnd: now,
+            completed,
+            pausedCount: recordInProgress.pausedCount || 0,
+            pauseDurations: recordInProgress.pauseDurations || [],
+            totalPausedDuration,
+            totalActiveDuration,
+            thoughts: feedback.thoughts,
+            rating: feedback.rating,
+            createdAt: now,
+            updatedAt: now,
+        };
+
+        onRecordCreate(finalRecord);
     };
 
     const handleToggleComplete = () => {
@@ -226,17 +327,22 @@ export function PomodoroTask({
     };
 
     const handleConfirmGiveUp = () => {
-        onTaskFail(failureReason); // Inform parent component
+
+        finalizeAndCreateRecord(false, { thoughts: failureReason });
+        // onTaskFail(failureReason); // Inform parent component
         setStatus("failed");
         setShowGiveUpConfirm(false);
         // In a real app, you might want a specific "failed" view before resetting
         setTimeout(resetTaskState, 2000);
+        onEnd(false, 0)
     };
 
     const handleConfirmCompletion = () => {
         if (editedRules !== rules) {
             onRulesUpdate(rules, editedRules); // Inform parent of the change
         }
+
+        finalizeAndCreateRecord(true, { thoughts: completionThoughts, rating: completionRating });
         setStatus("completed");
         onEnd(true, 10)
     };
@@ -251,7 +357,16 @@ export function PomodoroTask({
         setShowGiveUpConfirm(false);
         setFailureReason("");
         setEditedRules(rules); // Reset editor text
+        // +++ Reset record-related state
+        setRecordInProgress({});
+        setCompletionThoughts("");
+        setCompletionRating(undefined);
     };
+
+    const restartTask = () =>{
+        resetTaskState()
+        handleStartImmediately()
+    }
 
     useEffect(() => {
         setEditedRules(rules);
@@ -345,7 +460,7 @@ export function PomodoroTask({
                     }
 
                     <p className="text-sm text-gray-500 mt-2">{rules}</p>
-                    {rulesHistory.length > 0 && (
+                    {rulesHistory?.length > 0 && (
                         <details className="mt-3">
                             <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-700 flex items-center gap-1">
                                 <BookOpen className="w-3 h-3" />
@@ -426,34 +541,39 @@ export function PomodoroTask({
                             <>
                                 {allowPause && (
                                     <button onClick={handlePauseResume} className="px-4 border border-gray-300 py-2 hover:bg-gray-200 text-sm font-medium rounded-md inline-flex items-center">
-                                   <Pause  className="w-4 h-4 mr-1" stroke = "orange"/>     {status === "running" ? "暂停" : "继续"}
+
+
+                                        {status === "running" ? <Pause className="w-4 h-4 mr-1" stroke="orange" /> :
+
+                                            <Play className="w-4 h-4 mr-1" stroke="green"> </Play>}
+                                        {status === "running" ? "暂停" : "继续"}
                                     </button>
                                 )}
                                 <button
                                     onClick={handleInitiateGiveUp} // Changed from resetTaskState
                                     className="px-4 py-2 border text-sm font-medium rounded-md  inline-flex items-center border-gray-300  hover:bg-gray-200"
                                 >
-                                    <XCircle className="w-4 h-4 mr-1" stroke = "red"/> 放弃
+                                    <XCircle className="w-4 h-4 mr-1" stroke="red" /> 放弃
                                 </button>
                                 {type === "toggle" && status === "running" && (
                                     <button onClick={handleToggleComplete} className="px-4 border py-2 border-gray-300  hover:bg-gray-200 text-sm font-medium rounded-md inline-flex items-center">
-                                        <CheckCircle className="w-4 h-4 mr-1" stroke="green"/> 完成
+                                        <CheckCircle className="w-4 h-4 mr-1" stroke="green" /> 完成
                                     </button>
                                 )}
                             </>
                         )}
                         {status === "completed" && (
-                            <button onClick={resetTaskState} className="flex-1 ...">
+                            <button onClick={restartTask} className="flex-1 ...">
                                 <CheckCircle className="w-4 h-4 mr-2 text-green-500" /> 再来一次！
                             </button>
                         )}
                         {status === "failed" && (
                             <>
-                                <button onClick={resetTaskState} className="flex-1 ...">
+                                <button onClick={resetTaskState} className="flex-1 ">
                                     <XCircle className="w-4 h-4 mr-2 text-red-500" /> 重新开始
                                 </button>
-                                <button>
-                                    <Home />
+                                <button onClick={()=> onEnd(false, 0)}>
+                                    <Home /> 返回 
 
                                 </button>
                             </>

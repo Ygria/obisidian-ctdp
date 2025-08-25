@@ -6,7 +6,7 @@ import MyPlugin from "./main";
 
 export const VIEW_TYPE_EXAMPLE = "example-view";
 
-export class ExampleView extends ItemView {
+export class PomodoroView extends ItemView {
 	root: Root;
 	plugin: MyPlugin; // <-- 2. 添加一个属性来保存插件实例
 
@@ -20,7 +20,7 @@ export class ExampleView extends ItemView {
 	}
 
 	getDisplayText() {
-		return "Example view";
+		return "CDTP Pomodoro";
 	}
 
 	async onOpen() {

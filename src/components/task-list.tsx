@@ -13,7 +13,7 @@ interface TaskListProps {
     formatAchievement: (task: DisplayTask) => string | null;
     // You need to pass these down if you want to update from the card view
     onTaskFail: (index: number, reason: string) => void;
-    onRulesUpdate: (index: number, newRules: string) => void;
+    onRulesUpdate: (index: number, oldRules: string, newRules: string) => void;
 }
 
 export function TaskList({
@@ -26,7 +26,7 @@ export function TaskList({
 }: TaskListProps) {
     if (tasks.length === 0) {
         return (
-            <div className="text-center py-12 px-4 bg-white rounded-lg shadow-sm border">
+            <div className="text-center py-12 px-4 bg-white rounded-lg shadow-sm">
                 <h3 className="text-lg font-medium text-gray-900">
                     未找到任务
                 </h3>
@@ -138,28 +138,52 @@ export function TaskList({
 
     if (view === "table") {
         return (
-            <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
+            <div className="bg-white rounded-lg shadow-sm  overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     {/* ... table thead ... */}
                     <tbody className="bg-white divide-y divide-gray-200">
                         {tasks.map((task) => (
                             <tr key={task.originalIndex}>
-                                <td className="px-6 py-4">{task.name}</td>
-                                <td className="px-6 py-4">{task.taskGroup}</td>
-                                <td className="px-6 py-4">
-                                    {task.type === "timer" ? "定时" : "开关"}
+                                <td className="px-2 py-4 font-semibold">{task.name}</td>
+                                <td className=" py-4">
+
+
+                                    <Badge text={task.taskGroup}
+                                        style={TaskGroupStyles[task.taskGroup]} />
                                 </td>
                                 <td className="px-6 py-4">
+
+
+                                    <Badge
+                                        text={
+                                            task.type === "timer"
+                                                ? `定时${formatDuration(
+                                                    task.duration
+                                                )}`
+                                                : "开关"
+                                        }
+                                        style={TaskTypeStyles[task.type]}
+                                    />
+                                </td>
+                                <td className="px-2 py-4 truncate">
                                     {formatAchievement(task) || "暂无"}
                                 </td>
-                                <td className="px-6 py-4 text-right">
+                                <td className="px-6 py-4 text-right flex gap-x-2">
                                     <button
                                         onClick={() =>
-                                            onTaskStart(task.originalIndex)
+                                            onTaskStart(task.originalIndex, 'immediate')
+                                        }
+                                        className="text-blue-600 hover:text-blue-900 font-semibold flex items-center"
+                                    >
+                                        <Play className="w-4 h-4 mr-2" stroke="green" />立刻开始
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            onTaskStart(task.originalIndex, 'schedule')
                                         }
                                         className="text-blue-600 hover:text-blue-900 font-semibold"
                                     >
-                                        开始
+                                        预约
                                     </button>
                                 </td>
                             </tr>
@@ -176,19 +200,37 @@ export function TaskList({
                 {tasks.map((task) => (
                     <div
                         key={task.originalIndex}
-                        className="p-4 bg-white rounded-lg shadow-sm border flex flex-col justify-between"
+                        className="p-2 bg-white rounded-lg shadow-sm  flex flex-col justify-between"
                     >
                         <div>
                             <h3 className="font-semibold truncate">
                                 {task.name}
                             </h3>
-                            {/* ... other details ... */}
+                            <Badge
+                                text={task.taskGroup}
+                                style={TaskGroupStyles[task.taskGroup]}
+                            />
+                            <Badge
+                                text={
+                                    task.type === "timer"
+                                        ? `定时${formatDuration(
+                                            task.duration!
+                                        )}`
+                                        : "开关"
+                                }
+                                style={TaskTypeStyles[task.type]}
+                            />
+
+                            <p className="my-3 font-normal text-gray-500 dark:text-gray-400">
+                                {task.rules}
+                            </p>
+
                         </div>
                         <button
-                            onClick={() => onTaskStart(task.originalIndex)}
+                            onClick={() => onTaskStart(task.originalIndex, 'immediate')}
                             className="mt-4 w-full ..."
                         >
-                            <Play className="w-4 h-4 mr-2" />
+                            <Play className="w-4 h-4 mr-2" stroke="green" />
                             立刻开始
                         </button>
                     </div>

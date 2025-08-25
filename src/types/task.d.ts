@@ -10,7 +10,13 @@ export type TaskIcon = {
 	color?: string; // Optional color for emoji or custom icons
 };
 
+export type TaskGroupCount = {
+	name: TaskGroup,
+	count: number
+}
+
 export interface TaskData {
+	id: string
 	name: string;
 	type: "timer" | "toggle";
 	rules: string;
@@ -39,7 +45,7 @@ export interface RuleChange {
 export interface TaskRecord {
 	id: string; // 实例ID
 	taskId: string; // 外键 -> TaskData.id
-	taskGroupId: string; // 冗余存储，方便快速查询
+	taskGroup: string; // 冗余存储，方便快速查询
 
 	// 时间
 	appointmentStart: Date; // 预约开始
@@ -63,4 +69,6 @@ export interface TaskRecord {
 	updatedAt: Date;
 }
 
+
+export { TaskGroup };
 
