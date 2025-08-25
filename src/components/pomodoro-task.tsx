@@ -10,7 +10,8 @@ import {
     BookOpen, CheckCircle, ClockIcon, Home, Play, Timer, XCircle, Triangle, TriangleAlert,
 
     Crown,
-    Split
+    Split, 
+    Pause
 
 
 } from "lucide-react";
@@ -282,7 +283,7 @@ export function PomodoroTask({
     // --- NEW: Render completion confirmation view ---
     if (status === "confirming_completion") {
         return (
-            <div className="w-full max-w-md mx-auto shadow-lg border rounded-lg bg-white p-6">
+            <div className="w-full max-w-md mx-auto shadow-lg  rounded-lg bg-white p-6">
                 <div className="text-center">
 
 
@@ -328,13 +329,20 @@ export function PomodoroTask({
 
     return (
         <>
-            <div className="w-full max-w-md mx-auto shadow-lg hover:shadow-xl transition-shadow duration-300 border rounded-lg bg-white">
+            <div className="w-full max-w-md mx-auto shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg bg-white">
                 <div className="p-6 pb-4">
 
                     <div className="flex items-center justify-between mt-4">
                         <h2 className="text-lg font-semibold">{name}</h2>
-                        {/* Status Tags ... */}
+
                     </div>
+                    {status === 'scheduled' && (<p>
+                        <div class="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
+                            请在预约时间内完成任务开始标志动作:
+                            <span class="font-medium">{startSignal} </span>
+                        </div>
+                    </p>)
+                    }
 
                     <p className="text-sm text-gray-500 mt-2">{rules}</p>
                     {rulesHistory.length > 0 && (
@@ -365,7 +373,9 @@ export function PomodoroTask({
 
                                 {status === 'scheduled' && (<Animation name='timer' />)}
 
-                                {status === 'running' && (<Animation name={animation} />)}
+                                {status === 'running' && (<Animation name={animation ?? 'waiting'} />)}
+
+                                {status === 'paused' && (<Animation name='sandy-loading' />)}
                             </div>
                         </div>
                     </div>
@@ -415,19 +425,19 @@ export function PomodoroTask({
                         {(status === "running" || status === "paused") && (
                             <>
                                 {allowPause && (
-                                    <button onClick={handlePauseResume} className="...">
-                                        {status === "running" ? "暂停" : "继续"}
+                                    <button onClick={handlePauseResume} className="px-4 border border-gray-300 py-2 hover:bg-gray-200 text-sm font-medium rounded-md inline-flex items-center">
+                                   <Pause  className="w-4 h-4 mr-1" stroke = "orange"/>     {status === "running" ? "暂停" : "继续"}
                                     </button>
                                 )}
                                 <button
                                     onClick={handleInitiateGiveUp} // Changed from resetTaskState
-                                    className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 inline-flex items-center"
+                                    className="px-4 py-2 border text-sm font-medium rounded-md  inline-flex items-center border-gray-300  hover:bg-gray-200"
                                 >
-                                    <XCircle className="w-4 h-4 mr-1" /> 放弃
+                                    <XCircle className="w-4 h-4 mr-1" stroke = "red"/> 放弃
                                 </button>
                                 {type === "toggle" && status === "running" && (
-                                    <button onClick={handleToggleComplete} className="...">
-                                        <CheckCircle className="w-4 h-4 mr-1" /> 完成
+                                    <button onClick={handleToggleComplete} className="px-4 border py-2 border-gray-300  hover:bg-gray-200 text-sm font-medium rounded-md inline-flex items-center">
+                                        <CheckCircle className="w-4 h-4 mr-1" stroke="green"/> 完成
                                     </button>
                                 )}
                             </>

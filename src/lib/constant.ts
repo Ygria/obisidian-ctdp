@@ -1,4 +1,19 @@
-import { TaskGroup, TaskStatus } from "src/types/task";
+import { TaskStatus } from "src/types/task";
+
+
+export const ALL_TASK_GROUPS = [
+    "基础",
+    "生产",
+    "建设",
+    "突击",
+    "健康",
+    "科技",
+    "探索",
+    "采集",
+    "后勤",
+] as const; 
+
+export type TaskGroup = typeof ALL_TASK_GROUPS[number];
 
 export const TaskGroupStyles: Record<TaskGroup, string> = {
 	基础: "bg-gray-100 text-gray-800",

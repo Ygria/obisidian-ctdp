@@ -1,22 +1,7 @@
-export type TaskGroup =
-	| "基础"
-	| "生产"
-	| "建设"
-	| "突击"
-	| "健康"
-	| "科技"
-	| "探索"
-	| "采集"
-	| "后勤";
+// 将所有可能的任务分组定义为一个 const 数组
+// 这是我们的“唯一数据源”
 
-export type TaskStatus =
-	| "idle"
-	| "scheduled"
-	| "running"
-	| "paused"
-	| "completed"
-	| "failed"
-	| "confirming_completion"; // New status for post-task review
+import { TaskGroup } from "src/lib/constant";
 
 //  任务icon
 export type TaskIcon = {

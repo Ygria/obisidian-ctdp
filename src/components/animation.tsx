@@ -90,7 +90,9 @@ interface AnimationProps {
 export const Animation = ({ name }: AnimationProps) => {
 	return (
 		<>
-			<Lottie animationData={ANIMATION_DATA[name]?.data} />
+			<Lottie animationData={ANIMATION_DATA[name]?.data ?? ANIMATION_DATA[
+                'time'
+            ]?.data} />
 		</>
 	);
 };
