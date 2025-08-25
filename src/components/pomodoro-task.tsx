@@ -75,6 +75,8 @@ export interface PomodoroTaskProps {
     appointmentDuration: number;
     allowPause: boolean;
     rulesHistory: RuleChange[],
+    startSignal: string,
+    completionSignal: string;
     onRulesUpdate: (oldRules: string, newRules: string) => void;
     onTaskFail: (reason: string) => void;
     onStart?: () => void;
@@ -90,6 +92,8 @@ export interface PomodoroTaskProps {
 export function PomodoroTask({
     name,
     type,
+    startSignal,
+    completionSignal,
     rules,
     rulesHistory = [],
     duration = 25 * 60,

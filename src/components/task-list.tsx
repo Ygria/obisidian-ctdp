@@ -2,6 +2,9 @@ import React from "react";
 import { Timer, Play, Trophy } from "lucide-react";
 import type { DisplayTask } from "../hooks/useFilteredTasks";
 import { renderIcon } from "./ui/icon-picker";
+import { Badge } from "./ui/badge";
+import { TaskGroupStyles, TaskTypeStyles } from "./../lib/constant";
+import { formatDuration } from "../lib/utils";
 
 interface TaskListProps {
 	tasks: DisplayTask[];
@@ -43,18 +46,33 @@ export function TaskList({
 							key={task.originalIndex}
 							className="relative p-4  max-w-sm  bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700"
 						>
-							<h5 className="flex items-baseline mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white gap-2">
+							<h5 className="flex flex-wrap items-center mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white gap-2">
 								{task.icon && (
 									<div> {renderIcon(task.icon)}</div>
 								)}
 								{task.name}
+
+								<Badge
+									text={task.taskGroup}
+									style={TaskGroupStyles[task.taskGroup]}
+								/>
+								<Badge
+									text={
+										task.type === "timer"
+											? `定时${formatDuration(
+													task.duration
+											  )}`
+											: "开关"
+									}
+									style={TaskTypeStyles[task.type]}
+								/>
 							</h5>
 
 							<p className="mb-3 font-normal text-gray-500 dark:text-gray-400">
 								{task.rules}
 							</p>
 
-							<div className="flex gap-2 mt-12">
+							<div className="flex flex-wrap gap-2 mt-12">
 								<div
 									onClick={() =>
 										onTaskStart(
@@ -67,6 +85,10 @@ export function TaskList({
 									<span className=" flex items-center relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-transparent group-hover:dark:bg-transparent">
 										<Timer className="w-4 h-4 mr-2 text-lime-400" />
 										预约
+										{formatDuration(
+											task.appointmentDuration
+										)}
+										后开始
 									</span>
 								</div>
 								<div

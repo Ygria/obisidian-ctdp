@@ -1,4 +1,12 @@
-export type TaskGroup = "后勤" | "建设" | "突击" | "基础";
+export type TaskGroup ="基础" | "后勤"
+		| "建设"
+		| "突击"
+	
+		| "健康"
+		| "科技"
+		| "探索"
+		| "采集"
+		| "生产";
 
 export type TaskStatus =
 	| "idle"
@@ -9,6 +17,12 @@ export type TaskStatus =
 	| "failed"
 	| "confirming_completion"; // New status for post-task review
 
+//  任务icon
+export type TaskIcon = {
+	type: "emoji" | "icon";
+	value: string; // Emoji character or SVG path or custom identifier
+	color?: string; // Optional color for emoji or custom icons
+};
 
 export interface TaskData {
 	name: string;
@@ -18,18 +32,18 @@ export interface TaskData {
 	allowPause: boolean;
 	animation: string;
 	appointmentDuration: number;
-	taskGroup: "后勤" | "建设" | "突击" | "基础";
+	taskGroup:TaskGroup
+		
 	completionSignal: string;
 	achievedCount: number;
 	totalTimeAchieved: number;
-	rulesHistory: RuleChange[],
-	startSignal: string
-
+	rulesHistory: RuleChange[];
+	startSignal: string;
+	icon?: TaskIcon;
 }
-
 
 export interface RuleChange {
 	timestamp: string;
 	oldRules: string;
-	newRules: string
+	newRules: string;
 }

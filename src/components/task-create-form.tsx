@@ -2,46 +2,18 @@
 
 import type React from "react";
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import type { TaskData } from "../types/task";
 import { Animation } from "./animation";
 import { ANIMATION_DATA } from "./animation";
 import IconPicker from "./ui/icon-picker";
 
-const PlusIcon = ({ className }: { className?: string }) => (
-	<svg
-		xmlns="http://www.w3.org/2000/svg"
-		width="24"
-		height="24"
-		viewBox="0 0 24"
-		fill="none"
-		stroke="currentColor"
-		strokeWidth="2"
-		strokeLinecap="round"
-		strokeLinejoin="round"
-		className={className}
-	>
-		<path d="M5 12h14" />
-		<path d="M12 5v14" />
-	</svg>
-);
 // --- End Icon Replacements ---
 
 interface TaskCreateFormProps {
 	onSubmit: (task: TaskData) => void;
 	onCancel: () => void;
 }
-
-const animationOptions = [
-	{ value: "study", label: "📚 学习" },
-	{ value: "writing", label: "✍️ 写作" },
-	{ value: "exercise", label: "🏃 运动" },
-	{ value: "cleaning", label: "🧹 清洁" },
-	{ value: "coding", label: "💻 编程" },
-	{ value: "reading", label: "📖 阅读" },
-	{ value: "cooking", label: "🍳 烹饪" },
-	{ value: "meditation", label: "🧘 冥想" },
-];
 
 // 新增：任务分组选项
 const taskGroupOptions: TaskData["taskGroup"][] = [
@@ -136,9 +108,7 @@ export function TaskCreateForm({ onSubmit, onCancel }: TaskCreateFormProps) {
 	};
 
 	const inputClass = (fieldName: keyof typeof errors) =>
-		`bg-input border-border ${
-			errors[fieldName] ? "border-destructive" : ""
-		}`;
+		`bg-input border-border ${errors[fieldName] ? "border-red-500" : ""}`;
 
 	return (
 		<div className="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
@@ -193,7 +163,7 @@ export function TaskCreateForm({ onSubmit, onCancel }: TaskCreateFormProps) {
 							)}`}
 						/>
 						{errors.name && (
-							<p className="text-sm text-destructive">
+							<p className="text-sm text-red-600">
 								{errors.name}
 							</p>
 						)}
@@ -290,7 +260,7 @@ export function TaskCreateForm({ onSubmit, onCancel }: TaskCreateFormProps) {
 								</div>
 							</div>
 							{errors.duration && (
-								<p className="text-sm text-destructive">
+								<p className="text-sm text-red-500">
 									{errors.duration}
 								</p>
 							)}
@@ -335,7 +305,7 @@ export function TaskCreateForm({ onSubmit, onCancel }: TaskCreateFormProps) {
 							</div>
 						</div>
 						{errors.appointmentDuration && (
-							<p className="text-sm text-destructive">
+							<p className="text-sm text-red-500">
 								{errors.appointmentDuration}
 							</p>
 						)}
@@ -364,7 +334,7 @@ export function TaskCreateForm({ onSubmit, onCancel }: TaskCreateFormProps) {
 							)}`}
 						/>
 						{errors.rules && (
-							<p className="text-sm text-destructive">
+							<p className="text-sm text-red-500">
 								{errors.rules}
 							</p>
 						)}
@@ -456,9 +426,9 @@ export function TaskCreateForm({ onSubmit, onCancel }: TaskCreateFormProps) {
 					<div className="flex gap-3 pt-4">
 						<button
 							type="submit"
-							className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 font-medium inline-flex items-center justify-center rounded-md text-sm h-10 px-4 py-2"
+							className="flex items-center gap-x-2 text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
 						>
-							<PlusIcon className="h-4 w-4 mr-2" />
+							<Plus className="h-4 w-4 mr-2" />
 							创建任务
 						</button>
 						<button
